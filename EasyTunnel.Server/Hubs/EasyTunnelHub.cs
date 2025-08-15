@@ -30,15 +30,21 @@ public class EasyTunnelHub : Hub
     {
         Console.WriteLine("Client Close" + exception?.Message);
 
-        var client = ClientCollection[Context.ConnectionId];
-        client.CancellationTokenSource.Cancel();
-        client.CancellationTokenSource.Dispose();
-        ClientCollection.TryRemove(Context.ConnectionId, out _);
-
-        foreach(var item in client.PortMaps)
+        if(ClientCollection.Any(p => p.Key == Context.ConnectionId))
         {
-            ListenerCollection[item].Stop();
-            ListenerCollection.TryRemove(item, out _);
+            var client = ClientCollection[Context.ConnectionId];
+            client.CancellationTokenSource.Cancel();
+            client.CancellationTokenSource.Dispose();
+            ClientCollection.TryRemove(Context.ConnectionId, out _);
+
+            foreach(var item in client.PortMaps)
+            {
+                if(ListenerCollection.Any(p => p.Key == item))
+                {
+                    ListenerCollection[item].Stop();
+                    ListenerCollection.TryRemove(item, out _);
+                }
+            }
         }
     }
 
@@ -65,7 +71,7 @@ public class EasyTunnelHub : Hub
         _ = ListenAsync(Context.ConnectionId);
     }
 
-    public async Task ListenAsync(string connectionId)
+    private async Task ListenAsync(string connectionId)
     {
         var client = ClientCollection[Context.ConnectionId];
         foreach(var item in client.PortMaps)
@@ -97,11 +103,14 @@ public class EasyTunnelHub : Hub
 
             var trans = new TransService(remote, server, token);
             await trans.BridgeConnectAsync();
-            _ = proxy.SendAsync("Message", "Stop Tansaction");
+            _ = proxy.SendAsync("Message", "Stop Transaction");
         }
 
-        ListenerCollection[portMap].Stop();
-        ListenerCollection[portMap].Dispose();
-        ListenerCollection.TryRemove(portMap, out _);
+        if(ListenerCollection.Any(p => p.Key == portMap))
+        {
+            ListenerCollection[portMap].Stop();
+            ListenerCollection[portMap].Dispose();
+            ListenerCollection.TryRemove(portMap, out _);
+        }
     }
 }

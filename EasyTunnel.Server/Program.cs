@@ -1,10 +1,13 @@
+using EasyTunnel.Server.Filters;
 using EasyTunnel.Server.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR(p =>
 {
     p.ClientTimeoutInterval = TimeSpan.FromSeconds(120);
+    p.AddFilter<MyHubFilter>();
 });
 
 // Add services to the container.
