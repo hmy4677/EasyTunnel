@@ -46,6 +46,9 @@ public class EasyTunnelHub : Hub
                 }
             }
         }
+
+        Context.Abort();
+        await base.OnDisconnectedAsync(exception);
     }
 
     public async Task LoginAsync(string token, string userName, string[] portMaps)

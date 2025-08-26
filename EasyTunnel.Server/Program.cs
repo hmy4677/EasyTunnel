@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR(p =>
 {
-    p.ClientTimeoutInterval = TimeSpan.FromSeconds(120);
+    p.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
     p.AddFilter<MyHubFilter>();
 });
 

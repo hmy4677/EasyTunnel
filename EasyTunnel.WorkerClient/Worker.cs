@@ -31,10 +31,14 @@ public class Worker : BackgroundService
     {
         connection = new HubConnectionBuilder()
             .WithUrl($"http://{_clientConfig.ServerIP}:{_clientConfig.ServerPort}/server")
-            .WithAutomaticReconnect()
+            .WithAutomaticReconnect(new MyRetryPolicy())
             .WithKeepAliveInterval(TimeSpan.FromSeconds(60))
             .WithServerTimeout(TimeSpan.FromSeconds(60))
-            .Build();
+            .ConfigureLogging(logging =>
+            {
+                logging.SetMinimumLevel(LogLevel.Information);
+                logging.AddConsole();
+            }).Build();
 
         connection.On<string>("Message", (message) =>
         {
